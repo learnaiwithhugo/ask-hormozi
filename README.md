@@ -59,9 +59,10 @@ bash core/scripts/hq-ask-hormozi refresh
 
 ## Standalone install
 
-Requirements: macOS or Linux, Python 3.10+, and `curl`. The setup script
-installs the package in an isolated virtual environment and installs QMD from
-its official installer when QMD is not already available.
+Requirements: macOS or Linux, Python 3.10+, and Node.js 22+ (only needed
+when QMD is not already installed). The setup script installs the package in
+an isolated virtual environment and installs [QMD](https://github.com/tobi/qmd)
+with `npm install -g @tobilu/qmd` when it is not already available.
 
 ```bash
 git clone https://github.com/poseljacob/ask-hormozi.git

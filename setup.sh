@@ -54,20 +54,32 @@ python3 -m venv "$install_root/venv"
 "$install_root/venv/bin/python" -m pip install --quiet --upgrade "$project_root"
 ln -sfn "$install_root/venv/bin/ask-hormozi" "$bin_dir/ask-hormozi"
 
-export PATH="$bin_dir:$HOME/.cargo/bin:$PATH"
+export PATH="$bin_dir:$PATH"
 
+# The search engine this package drives is QMD by Tobi Lütke (@tobilu/qmd on
+# npm): `qmd collection add`, `qmd search --json`, `qmd context add`. It is a
+# Node package, so installing it needs Node 22+ and npm.
 if ! command -v qmd >/dev/null 2>&1; then
-  qmd_installer="$(mktemp)"
-  curl -fsSL https://sh.qntx.fun/qmd -o "$qmd_installer"
-  sh "$qmd_installer"
-  rm -f "$qmd_installer"
-  export PATH="$HOME/.cargo/bin:$PATH"
+  if ! command -v npm >/dev/null 2>&1; then
+    printf '%s\n' \
+      "error: qmd is not installed and npm was not found, so it cannot be installed." \
+      "Install Node.js 22 or newer from https://nodejs.org, then run ./setup.sh again." >&2
+    exit 1
+  fi
+  node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
+  if [[ "$node_major" -lt 22 ]]; then
+    printf '%s\n' \
+      "error: qmd needs Node.js 22 or newer (found $(node --version 2>/dev/null || echo none))." \
+      "Upgrade Node.js from https://nodejs.org, then run ./setup.sh again." >&2
+    exit 1
+  fi
+  npm install -g @tobilu/qmd
 fi
 
 if ! command -v qmd >/dev/null 2>&1; then
   printf '%s\n' \
-    "error: QMD installation finished but qmd is not on PATH." \
-    "See https://github.com/qntx-labs/qmd for manual installation." >&2
+    "error: qmd installation finished but qmd is not on PATH." \
+    "See https://github.com/tobi/qmd for manual installation." >&2
   exit 1
 fi
 

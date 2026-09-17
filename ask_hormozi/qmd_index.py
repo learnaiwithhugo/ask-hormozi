@@ -150,12 +150,11 @@ def search_corpus(
                 collection,
                 "--limit",
                 str(raw_limit),
-                "--format",
-                "json",
+                "--json",
                 "--line-numbers",
             ]
         )
-        payload = json.loads(completed.stdout)
+        payload = _parse_json_output(completed.stdout)
         raw_results = (
             payload.get("results", []) if isinstance(payload, dict) else payload
         )
@@ -431,6 +430,15 @@ def _rank_search_results(
         )
 
     return sorted(results, key=rank_key, reverse=True)
+
+
+def _parse_json_output(stdout: str) -> Any:
+    # Some qmd builds print plain text such as "No results found." instead of
+    # an empty JSON array when nothing matches.
+    try:
+        return json.loads(stdout)
+    except json.JSONDecodeError:
+        return []
 
 
 def _require_qmd() -> None:
